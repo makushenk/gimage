@@ -1,15 +1,19 @@
 package usecase
 
 import (
-	"github.com/makushenk/gimage/domain"
+	iboundaries "github.com/makushenk/gimage/boundaries/infrastructure"
+	rboundaries "github.com/makushenk/gimage/boundaries/repository"
+	uboundaries "github.com/makushenk/gimage/boundaries/usecase"
 )
 
 type imageUsecase struct {
-	imageRepository domain.ImageRepository
+	imageRepository     rboundaries.ImageRepository
+	imageInfrastructure iboundaries.ImageInfrastructure
 }
 
-func NewImageUsecase(i domain.ImageRepository) domain.ImageUsecase {
+func NewImageUsecase(r rboundaries.ImageRepository, i iboundaries.ImageInfrastructure) uboundaries.ImageUsecase {
 	return &imageUsecase{
-		imageRepository: i,
+		imageRepository:     r,
+		imageInfrastructure: i,
 	}
 }

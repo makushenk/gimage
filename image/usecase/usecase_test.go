@@ -2,9 +2,9 @@ package usecase
 
 import (
 	"context"
+	boundaries "github.com/makushenk/gimage/boundaries/repository"
 	"testing"
 
-	"github.com/makushenk/gimage/domain"
 	mocks "github.com/makushenk/gimage/domain/mocks/image"
 
 	"github.com/stretchr/testify/assert"
@@ -13,19 +13,21 @@ import (
 
 func TestImageUsecase_GetByID(t *testing.T) {
 	mockImageRepo :=  new(mocks.ImageRepository)
-	mockImage := domain.Image{
+	mockImageInfrastructure := new(mocks.ImageInfrastructure)
+	mockImage := boundaries.Image{
 		ID: 		"mockID",
 		Name:		"mockName",
-		Data:		[]byte{1,0,0,0},
+		Path:		"",
 	}
 
 	t.Run("Getting image by id", func(t *testing.T) {
 		mockImageRepo.On("GetByID", mock.Anything, mock.AnythingOfType("string")).Return(mockImage, nil).Once()
 
-		i, err := NewImageUsecase(mockImageRepo).GetByID(context.TODO(), mockImage.ID)
+		i, err := NewImageUsecase(mockImageRepo, mockImageInfrastructure).GetByID(context.TODO(), mockImage.ID)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, i)
+		assert.Equal(t, mockImage.ID, i.ID)
 		mockImageRepo.AssertExpectations(t)
 	})
 
@@ -33,10 +35,11 @@ func TestImageUsecase_GetByID(t *testing.T) {
 
 func TestImageUsecase_Create(t *testing.T) {
 	mockImageRepo := new(mocks.ImageRepository)
-	mockImage := domain.Image{
+	mockImageInfrastructure := new(mocks.ImageInfrastructure)
+	mockImage := boundaries.Image{
 		ID:			"mockID",
 		Name:		"mockName",
-		Data:		[]byte{},
+		Path:		"",
 	}
 
 	t.Run("Creating image", func(t *testing.T) {
@@ -46,9 +49,9 @@ func TestImageUsecase_Create(t *testing.T) {
 			mock.Anything,
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("[]uint8"),
-		).Return(mockImage.ID, nil).Once()
+		).Return(mockImage, nil).Once()
 
-		i, err := NewImageUsecase(mockImageRepo).Create(context.TODO(), mockImage.Name, mockImage.Data)
+		i, err := NewImageUsecase(mockImageRepo, mockImageInfrastructure).Create(context.TODO(), mockImage.Name, []byte{})
 
 		assert.NoError(t, err)
 		assert.NotNil(t, i)
@@ -58,6 +61,7 @@ func TestImageUsecase_Create(t *testing.T) {
 
 func TestImageUsecase_Delete(t *testing.T) {
 	mockImageRepo := new(mocks.ImageRepository)
+	mockImageInfrastructure := new(mocks.ImageInfrastructure)
 
 	t.Run("Deletion of an image", func(t *testing.T) {
 		mockID := "mockID"
@@ -68,7 +72,7 @@ func TestImageUsecase_Delete(t *testing.T) {
 			mock.AnythingOfType("[]string"),
 		).Return(1, nil).Once()
 
-		err := NewImageUsecase(mockImageRepo).Delete(context.TODO(), []string{mockID})
+		err := NewImageUsecase(mockImageRepo, mockImageInfrastructure).Delete(context.TODO(), []string{mockID})
 
 		assert.NoError(t, err)
 		mockImageRepo.AssertExpectations(t)
@@ -84,7 +88,7 @@ func TestImageUsecase_Delete(t *testing.T) {
 			mock.AnythingOfType("[]string"),
 		).Return(1, nil).Once()
 
-		err := NewImageUsecase(mockImageRepo).Delete(context.TODO(), []string{mockID1, mockID2})
+		err := NewImageUsecase(mockImageRepo, mockImageInfrastructure).Delete(context.TODO(), []string{mockID1, mockID2})
 
 		assert.Error(t, err)
 		mockImageRepo.AssertExpectations(t)

@@ -4,22 +4,16 @@ import (
 	"context"
 	"log"
 
-	"github.com/makushenk/gimage/domain"
+	"github.com/makushenk/gimage/boundaries/repository"
 )
 
-func (i *imageUsecase) Create(ctx context.Context, name string,data []byte) (domain.Image, error) {
-	id, err := i.imageRepository.Create(ctx, name, data)
+func (i *imageUsecase) Create(ctx context.Context, name string,data []byte) (boundaries.Image, error) {
+	img, err := i.imageRepository.Create(ctx, name, data)
 
 	if err != nil {
 		log.Fatal(err)
-		return domain.Image{}, err
+		return boundaries.Image{}, err
 	}
 
-	img := domain.Image{
-		ID:		id,
-		Name:	name,
-		Data:	data,
-	}
-
-	return img, err
+	return img, nil
 }
