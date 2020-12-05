@@ -27,8 +27,8 @@ func (_m *ImageUsecase) GetByID(ctx context.Context, id string) (domain.Image, e
 	return args.Get(0).(domain.Image), args.Error(1)
 }
 
-func (_m *ImageUsecase) GetThumbnail(ctx context.Context, image *domain.Image) (domain.Image, error) {
-	args := _m.Called(ctx, image)
+func (_m *ImageUsecase) GetThumbnail(ctx context.Context, id string, x, y int, width, height int) (domain.Image, error) {
+	args := _m.Called(ctx, id, x, y, width, height)
 	return args.Get(0).(domain.Image), args.Error(1)
 }
 
