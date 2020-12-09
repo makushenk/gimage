@@ -2,10 +2,11 @@ package usecase
 
 import (
 	"context"
-	boundaries "github.com/makushenk/gimage/boundaries/repository"
+	"errors"
 	"testing"
 
-	mocks "github.com/makushenk/gimage/domain/mocks/image"
+	rboundaries "github.com/makushenk/gimage/boundaries/repository"
+	mocks "github.com/makushenk/gimage/mocks/image"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -14,7 +15,7 @@ import (
 func TestImageUsecase_GetByID(t *testing.T) {
 	mockImageRepo :=  new(mocks.ImageRepository)
 	mockImageInfrastructure := new(mocks.ImageInfrastructure)
-	mockImage := boundaries.Image{
+	mockImage := rboundaries.Image{
 		ID: 		"mockID",
 		Name:		"mockName",
 		Path:		"",
@@ -36,7 +37,7 @@ func TestImageUsecase_GetByID(t *testing.T) {
 func TestImageUsecase_Create(t *testing.T) {
 	mockImageRepo := new(mocks.ImageRepository)
 	mockImageInfrastructure := new(mocks.ImageInfrastructure)
-	mockImage := boundaries.Image{
+	mockImage := rboundaries.Image{
 		ID:			"mockID",
 		Name:		"mockName",
 		Path:		"",
@@ -55,6 +56,23 @@ func TestImageUsecase_Create(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotNil(t, i)
+		mockImageRepo.AssertExpectations(t)
+	})
+
+	t.Run("Creating image with repository error", func(t *testing.T){
+		mockErr := errors.New("repository error")
+		mockImageRepo.On(
+			"Create",
+			mock.Anything,
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("[]uint8"),
+		).Return(rboundaries.Image{}, mockErr).Once()
+
+		i, err := NewImageUsecase(mockImageRepo, mockImageInfrastructure).Create(context.TODO(), "testName", []byte{})
+
+		assert.Empty(t, rboundaries.Image{}, i)
+		assert.Error(t, err)
+		assert.Equal(t, mockErr, err)
 		mockImageRepo.AssertExpectations(t)
 	})
 }
@@ -91,6 +109,21 @@ func TestImageUsecase_Delete(t *testing.T) {
 		err := NewImageUsecase(mockImageRepo, mockImageInfrastructure).Delete(context.TODO(), []string{mockID1, mockID2})
 
 		assert.Error(t, err)
+		mockImageRepo.AssertExpectations(t)
+	})
+
+	t.Run("Deleting image with repository error", func(t *testing.T){
+		mockErr := errors.New("repository error")
+		mockImageRepo.On(
+			"Delete",
+			mock.Anything,
+			mock.AnythingOfType("[]string"),
+		).Return(0, mockErr).Once()
+
+		err := NewImageUsecase(mockImageRepo, mockImageInfrastructure).Delete(context.TODO(), []string{})
+
+		assert.Error(t, err)
+		assert.Equal(t, mockErr, err)
 		mockImageRepo.AssertExpectations(t)
 	})
 }

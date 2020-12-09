@@ -3,47 +3,52 @@ package repository
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
-	"path"
 
-	"github.com/makushenk/gimage/boundaries/repository"
-	"github.com/makushenk/gimage/image/repository/fs/utils"
-
-	"github.com/google/uuid"
+	iboundaries "github.com/makushenk/gimage/boundaries/infrastructure"
+	rboundaries "github.com/makushenk/gimage/boundaries/repository"
 )
 
 type fsImageRepository struct {
-	MountPoint	string
+	MountPoint				string
+	CommonInfrastructure	iboundaries.CommonInfrastructure
+	PathInfrastructure		iboundaries.PathInfrastructure
+	OsInfrastructure		iboundaries.OsInfrastructure
 }
 
-func NewFsImageRepository(mountPoint string) boundaries.ImageRepository {
+func NewFsImageRepository(
+		mountPoint string,
+		commonInf iboundaries.CommonInfrastructure,
+		osInf iboundaries.OsInfrastructure,
+		pathInf iboundaries.PathInfrastructure,
+	) rboundaries.ImageRepository {
+
 	return &fsImageRepository{
 		MountPoint: mountPoint,
+		CommonInfrastructure: commonInf,
+		OsInfrastructure: osInf,
+		PathInfrastructure: pathInf,
 	}
 }
 
-func (f *fsImageRepository) Create(ctx context.Context, name string, data []byte) (boundaries.Image, error) {
-	id := uuid.New().String()
-	dir := path.Join(f.MountPoint, id)
-	file := path.Join(dir, name)
+func (f *fsImageRepository) Create(ctx context.Context, name string, data []byte) (rboundaries.Image, error) {
+	id := f.CommonInfrastructure.NewUUID().String()
+	dir := f.PathInfrastructure.Join(f.MountPoint, id)
+	file := f.PathInfrastructure.Join(dir, name)
 
-	err := os.MkdirAll(dir, os.ModePerm)
-
-	if err != nil {
-		log.Fatal(err)
-		return boundaries.Image{}, err
-	}
-
-	err = ioutil.WriteFile(file, data, os.ModePerm)
+	err := f.OsInfrastructure.MkdirAll(dir, os.ModePerm)
 
 	if err != nil {
-		log.Fatal(err)
-		return boundaries.Image{}, err
+		return rboundaries.Image{}, err
 	}
 
-	img := boundaries.Image{
+	err = f.OsInfrastructure.WriteFile(file, data, os.ModePerm)
+
+	if err != nil {
+		return rboundaries.Image{}, err
+	}
+
+	img := rboundaries.Image{
 		ID:	id,
 		Name: name,
 		Path: file,
@@ -53,42 +58,34 @@ func (f *fsImageRepository) Create(ctx context.Context, name string, data []byte
 
 func (f *fsImageRepository) Delete(ctx context.Context, ids []string) (int, error) {
 	for i, id := range ids {
-		dir := path.Join(f.MountPoint, id)
+		dir := f.PathInfrastructure.Join(f.MountPoint, id)
 
-		err := os.RemoveAll(dir)
+		err := f.OsInfrastructure.RemoveAll(dir)
 
 		if err != nil {
-			log.Fatal(err)
 			return i, err
 		}
-
 	}
 
 	return len(ids), nil
 }
 
-func (f *fsImageRepository) GetByID(ctx context.Context, id string) (boundaries.Image, error) {
-	dir := path.Join(f.MountPoint, id)
+func (f *fsImageRepository) GetByID(ctx context.Context, id string) (rboundaries.Image, error) {
+	dir := f.PathInfrastructure.Join(f.MountPoint, id)
 
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		return boundaries.Image{}, fmt.Errorf("image with id %s doesn't exists", id)
+	if _, err := f.OsInfrastructure.Stat(dir); f.OsInfrastructure.IsNotExist(err) {
+		return rboundaries.Image{}, fmt.Errorf("image with id %s doesn't exists", id)
 	}
 
-	file, err := utils.GetFirstFile(dir)
+	file, err := f.OsInfrastructure.GetFirstFile(dir)
 
 	if err != nil {
-		log.Fatal(err)
-		return boundaries.Image{}, err
+		return rboundaries.Image{}, err
 	}
 
-	_, name := path.Split(file)
+	_, name := f.PathInfrastructure.Split(file)
 
-	if err != nil {
-		log.Fatal(err)
-		return boundaries.Image{}, err
-	}
-
-	image := boundaries.Image{
+	image := rboundaries.Image{
 		Path: file,
 		Name: name,
 	}

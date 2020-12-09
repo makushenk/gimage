@@ -2,8 +2,6 @@ package usecase
 
 import (
 	"context"
-	"log"
-
 	"github.com/makushenk/gimage/boundaries/repository"
 )
 
@@ -11,7 +9,6 @@ func (i *imageUsecase) GetThumbnail(ctx context.Context, id string, x, y int, wi
 	sourceImg, err := i.imageRepository.GetByID(ctx, id)
 
 	if err != nil {
-		log.Fatal(err)
 		return boundaries.Image{}, err
 	}
 
@@ -20,7 +17,6 @@ func (i *imageUsecase) GetThumbnail(ctx context.Context, id string, x, y int, wi
 	previewImg, err := i.imageRepository.Create(context.TODO(), previewName, []byte{})
 
 	if err != nil {
-		log.Fatal(err)
 		return boundaries.Image{}, err
 	}
 
