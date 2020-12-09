@@ -8,8 +8,7 @@ import (
 	boundaries "github.com/makushenk/gimage/boundaries/repository"
 	"github.com/makushenk/gimage/domain"
 	"github.com/makushenk/gimage/infrastructure"
-	mockimg "github.com/makushenk/gimage/mocks/image"
-	mockinf "github.com/makushenk/gimage/mocks/infrastructure"
+	imocks "github.com/makushenk/gimage/infrastructure/mocks"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -29,7 +28,7 @@ func TestFsImageRepository_Create(t *testing.T) {
 	testFsImageRepo := NewFsImageRepository(testFsMountPoint, commonInfrastructure, osInfrastructure, pathInfrastructure)
 
 	t.Run("Creating GIF image", func(t *testing.T) {
-		dataGIF, err := commonInfrastructure.DecodeBase64String(mockimg.GifMock)
+		dataGIF, err := commonInfrastructure.DecodeBase64String(imocks.GifBase64Data)
 		assert.NoError(t, err)
 
 		img, err := testFsImageRepo.Create(context.TODO(), "image.gif", dataGIF)
@@ -42,7 +41,7 @@ func TestFsImageRepository_Create(t *testing.T) {
 	})
 
 	t.Run("Creating JPG image", func(t *testing.T) {
-		dataJPG, err := commonInfrastructure.DecodeBase64String(mockimg.JpgMock)
+		dataJPG, err := commonInfrastructure.DecodeBase64String(imocks.JpgBase64Data)
 		assert.NoError(t, err)
 
 		img , err := testFsImageRepo.Create(context.TODO(), "image.jpg", dataJPG)
@@ -55,7 +54,7 @@ func TestFsImageRepository_Create(t *testing.T) {
 	})
 
 	t.Run("Creating PNG image", func(t *testing.T) {
-		dataPNG, err := commonInfrastructure.DecodeBase64String(mockimg.PngMock)
+		dataPNG, err := commonInfrastructure.DecodeBase64String(imocks.PngBase64Data)
 		assert.NoError(t, err)
 
 		img , err := testFsImageRepo.Create(context.TODO(), "image.png",dataPNG)
@@ -68,7 +67,7 @@ func TestFsImageRepository_Create(t *testing.T) {
 	})
 
 	t.Run("Creating image with making dir error", func(t *testing.T) {
-		osInfrastructureMock := new(mockinf.OsInfrastructure)
+		osInfrastructureMock := new(imocks.OsInfrastructure)
 		testFsImageRepo = NewFsImageRepository(testFsMountPoint, commonInfrastructure, osInfrastructureMock, pathInfrastructure)
 		osInfrastructureMock.On(
 			"MkdirAll",
@@ -76,7 +75,7 @@ func TestFsImageRepository_Create(t *testing.T) {
 			mock.Anything,
 		).Return(errors.New("mkdirall error")).Once()
 
-		dataGIF, err := commonInfrastructure.DecodeBase64String(mockimg.GifMock)
+		dataGIF, err := commonInfrastructure.DecodeBase64String(imocks.GifBase64Data)
 		assert.NoError(t, err)
 
 		img, err := testFsImageRepo.Create(context.TODO(), "image.gif", dataGIF)
@@ -85,7 +84,7 @@ func TestFsImageRepository_Create(t *testing.T) {
 	})
 
 	t.Run("Creating image with writing file error", func(t *testing.T) {
-		osInfrastructureMock := new(mockinf.OsInfrastructure)
+		osInfrastructureMock := new(imocks.OsInfrastructure)
 		testFsImageRepo = NewFsImageRepository(testFsMountPoint, commonInfrastructure, osInfrastructureMock, pathInfrastructure)
 		osInfrastructureMock.On(
 			"MkdirAll",
@@ -99,7 +98,7 @@ func TestFsImageRepository_Create(t *testing.T) {
 			mock.Anything,
 		).Return(errors.New("writefile error")).Once()
 
-		dataGIF, err := commonInfrastructure.DecodeBase64String(mockimg.GifMock)
+		dataGIF, err := commonInfrastructure.DecodeBase64String(imocks.GifBase64Data)
 		assert.NoError(t, err)
 
 		img, err := testFsImageRepo.Create(context.TODO(), "image.gif", dataGIF)
@@ -127,7 +126,7 @@ func TestFsImageRepository_Delete(t *testing.T) {
 	})
 
 	t.Run("Deletion of 1 image", func(t *testing.T) {
-		dataGIF, err := commonInfrastructure.DecodeBase64String(mockimg.GifMock)
+		dataGIF, err := commonInfrastructure.DecodeBase64String(imocks.GifBase64Data)
 		assert.NoError(t, err)
 
 		img, err := testFsImageRepo.Create(context.TODO(), "image.gif", dataGIF)
@@ -140,17 +139,17 @@ func TestFsImageRepository_Delete(t *testing.T) {
 	})
 
 	t.Run("Deletion of multiple images", func(t *testing.T) {
-		dataGIF, err := commonInfrastructure.DecodeBase64String(mockimg.GifMock)
+		dataGIF, err := commonInfrastructure.DecodeBase64String(imocks.GifBase64Data)
 		assert.NoError(t, err)
 		img1, err := testFsImageRepo.Create(context.TODO(), "image.gif", dataGIF)
 		assert.NoError(t, err)
 
-		dataJPG, err := commonInfrastructure.DecodeBase64String(mockimg.JpgMock)
+		dataJPG, err := commonInfrastructure.DecodeBase64String(imocks.JpgBase64Data)
 		assert.NoError(t,err)
 		img2, err := testFsImageRepo.Create(context.TODO(), "image.jpg", dataJPG)
 		assert.NoError(t, err)
 
-		dataPNG, err := commonInfrastructure.DecodeBase64String(mockimg.PngMock)
+		dataPNG, err := commonInfrastructure.DecodeBase64String(imocks.PngBase64Data)
 		assert.NoError(t,err)
 		img3, err := testFsImageRepo.Create(context.TODO(), "image.png", dataPNG)
 		assert.NoError(t, err)
@@ -162,7 +161,7 @@ func TestFsImageRepository_Delete(t *testing.T) {
 	})
 
 	t.Run("Deletion with removing all error", func(t *testing.T) {
-		osInfrastructureMock := new(mockinf.OsInfrastructure)
+		osInfrastructureMock := new(imocks.OsInfrastructure)
 		testFsImageRepo = NewFsImageRepository(testFsMountPoint, commonInfrastructure, osInfrastructureMock, pathInfrastructure)
 		osInfrastructureMock.On(
 			"MkdirAll",
@@ -180,7 +179,7 @@ func TestFsImageRepository_Delete(t *testing.T) {
 			mock.AnythingOfType("string"),
 		).Return(errors.New("remove all error")).Once()
 
-		dataGIF, err := commonInfrastructure.DecodeBase64String(mockimg.GifMock)
+		dataGIF, err := commonInfrastructure.DecodeBase64String(imocks.GifBase64Data)
 		assert.NoError(t, err)
 
 		img, err := testFsImageRepo.Create(context.TODO(), "image.gif", dataGIF)
@@ -206,7 +205,7 @@ func TestFsImageRepository_GetByID(t *testing.T) {
 	testFsImageRepo := NewFsImageRepository(testFsMountPoint, commonInfrastructure, osInfrastructure, pathInfrastructure)
 
 	t.Run("Getting image by existing id", func(t *testing.T) {
-		dataGIF, err := commonInfrastructure.DecodeBase64String(mockimg.GifMock)
+		dataGIF, err := commonInfrastructure.DecodeBase64String(imocks.GifBase64Data)
 		assert.NoError(t, err)
 
 		img, err := testFsImageRepo.Create(context.TODO(), "image.gif", dataGIF)
@@ -227,7 +226,7 @@ func TestFsImageRepository_GetByID(t *testing.T) {
 	})
 
 	t.Run("Get image with get first file error", func(t *testing.T) {
-		dataGIF, err := commonInfrastructure.DecodeBase64String(mockimg.GifMock)
+		dataGIF, err := commonInfrastructure.DecodeBase64String(imocks.GifBase64Data)
 		assert.NoError(t, err)
 
 		img, err := testFsImageRepo.Create(context.TODO(), "image.gif", dataGIF)

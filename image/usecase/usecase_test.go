@@ -6,7 +6,8 @@ import (
 	"testing"
 
 	rboundaries "github.com/makushenk/gimage/boundaries/repository"
-	mocks "github.com/makushenk/gimage/mocks/image"
+	"github.com/makushenk/gimage/image/mocks"
+	imocks "github.com/makushenk/gimage/infrastructure/mocks"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -14,7 +15,7 @@ import (
 
 func TestImageUsecase_GetByID(t *testing.T) {
 	mockImageRepo :=  new(mocks.ImageRepository)
-	mockImageInfrastructure := new(mocks.ImageInfrastructure)
+	mockImageInfrastructure := new(imocks.ImageInfrastructure)
 	mockImage := rboundaries.Image{
 		ID: 		"mockID",
 		Name:		"mockName",
@@ -36,7 +37,7 @@ func TestImageUsecase_GetByID(t *testing.T) {
 
 func TestImageUsecase_Create(t *testing.T) {
 	mockImageRepo := new(mocks.ImageRepository)
-	mockImageInfrastructure := new(mocks.ImageInfrastructure)
+	mockImageInfrastructure := new(imocks.ImageInfrastructure)
 	mockImage := rboundaries.Image{
 		ID:			"mockID",
 		Name:		"mockName",
@@ -79,7 +80,7 @@ func TestImageUsecase_Create(t *testing.T) {
 
 func TestImageUsecase_Delete(t *testing.T) {
 	mockImageRepo := new(mocks.ImageRepository)
-	mockImageInfrastructure := new(mocks.ImageInfrastructure)
+	mockImageInfrastructure := new(imocks.ImageInfrastructure)
 
 	t.Run("Deletion of an image", func(t *testing.T) {
 		mockID := "mockID"

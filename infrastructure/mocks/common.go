@@ -18,6 +18,3 @@ func (_m *CommonInfrastructure) DecodeBase64String(s string) ([]byte, error) {
 	args := _m.Called(s)
 	return args.Get(0).([]byte), args.Error(1).(error)
 }
-
-
-
